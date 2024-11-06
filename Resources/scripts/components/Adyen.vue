@@ -68,7 +68,14 @@ async function createAdyenCheckout(data) {
     countryCode: data.countryCode,
 
     onPaymentCompleted: (result, component) => {
-      console.log("result: " + result);
+      console.log('Payment complete', JSON.stringify(result))
+
+      paymentProviderStore
+        .confirmTransaction(data.transaction.unique_hash)
+        .then((res) => {
+          paymentReceiptUrl.value = `/m/payments/pdf/${data.transaction.unique_hash}`
+          emit('reload', paymentReceiptUrl.value)
+        })
     },
     onPaymentFailed: (result, component) => {
       console.error("result: " + result);
