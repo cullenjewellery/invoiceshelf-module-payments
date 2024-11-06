@@ -56,6 +56,7 @@ trait AuthorizationTrait
         //adyen authorization
         if ($driver == 'adyen') {
             $response = Http::withHeaders([
+                'Content-Type' => 'application/json',
                 'X-API-Key' => $secret,
             ])->get('https://checkout-test.adyen.com/v71/storedPaymentMethods?merchantAccount=CullenJewelleryCOM');
 

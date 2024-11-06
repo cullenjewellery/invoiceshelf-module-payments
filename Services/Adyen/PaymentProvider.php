@@ -10,6 +10,7 @@ use App\Models\Transaction;
 use Illuminate\Support\Facades\Http;
 use Modules\Payments\Services\PaymentInterface;
 use Modules\Payments\Helpers\VersionHelper;
+use Ramsey\Uuid\Uuid;
 
 if (VersionHelper::checkAppVersion('<', '2.0.0')) {
     VersionHelper::aliasClass('InvoiceShelf\Models\Company', 'App\Models\Company');
@@ -19,19 +20,6 @@ if (VersionHelper::checkAppVersion('<', '2.0.0')) {
     VersionHelper::aliasClass('InvoiceShelf\Models\Transaction', 'App\Models\Transaction');
 }
 
-// use Adyen\Model\Checkout\Amount;
-// use Adyen\Model\Checkout\CreateCheckoutSessionRequest;
-// use Adyen\Service\Checkout\PaymentsApi;
-
-// // Include your idempotency key when you make an API request.
-// $requestOptions['idempotencyKey'] = "YOUR_IDEMPOTENCY_KEY";
-
-// // Set up the client and service.
-// $client = new \Adyen\Client();
-// $client->setXApiKey('ADYEN_API_KEY');
-// $client->setEnvironment(\Adyen\Environment::TEST);
-
-// $service = new PaymentsApi($client);
 
 class PaymentProvider implements PaymentInterface
 {
@@ -46,15 +34,20 @@ class PaymentProvider implements PaymentInterface
     {
         $currency = Currency::find($invoice->currency_id);
 
-        $response = Http::withHeaders([
-                'Content-Type' => 'application/json',
-                'Accept-Language' => 'en_US'
-            ])
-            ->withBasicAuth($this->settings['key'], $this->settings['secret'])
-            ->post("https://api.razorpay.com/v1/orders", [
-                'amount' => $invoice->total,
-                'currency' => $currency->code,
-            ]);
+        $response =  Http::withHeaders([
+          'Content-Type' => 'application/json',
+          'X-API-Key' => $this->settings['secret'],
+          'Idempotency-Key' => (string) Uuid::uuid4(),
+        ])->post('https://checkout-test.adyen.com/v71/sessions', [
+          'merchantAccount' => 'CullenJewelleryCOM',
+          'amount' => [
+            'value' => $invoice->total,
+            'currency' => $currency->code
+          ],
+          'returnUrl' => "https://invoices.cullenjewellery.com",
+          'reference' => $invoice->invoice_number,
+          'countryCode' => "NZ", // TODO: don't hard code this.
+        ]);
 
         if ($response->status() !== 200) {
             return $response->json();
@@ -64,7 +57,7 @@ class PaymentProvider implements PaymentInterface
 
         $data = [
             'transaction_id' => $response['id'],
-            'type' => 'razorpay',
+            'type' => 'adyen',
             'status' => Transaction::PENDING,
             'transaction_date' => Carbon::now(),
             'invoice_id' => $invoice->id,
