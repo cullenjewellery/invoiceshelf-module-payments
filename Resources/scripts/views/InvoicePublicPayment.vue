@@ -96,6 +96,7 @@ import InvoiceShelfLogo from '@/static/img/logo-gray.png'
 import RazorPay from '~/scripts/components/RazorPay.vue'
 import StripePay from '~/scripts/components/StripePayment.vue'
 import Paypal from '~/scripts/components/Paypal.vue'
+import Adyen from '../components/Adyen.vue';
 import PaymentSuccessBlock from '~/scripts/components/PaymentSuccessBlock.vue'
 
 const route = useRoute()
@@ -167,6 +168,8 @@ const paymentComponent = computed(() => {
   if (paymentProviderStore.selectedProvider.driver == 'stripe') return StripePay
 
   if (paymentProviderStore.selectedProvider.driver == 'paypal') return Paypal
+
+  if (paymentProviderStore.selectedProvider.driver == 'adyen') return Adyen
 
   return null
 })

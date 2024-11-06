@@ -21,6 +21,7 @@
     "stripe": "Stripe",
     "paypal": "Paypal",
     "razorpay": "Razorpay",
+    "adyen": "Adyen",
     "select_payment_method": "Select a Payment Method",
     "enter_payment_details": "Enter Payment Details",
     "pay_with_razorpay": "Pay {amount} with Razorpay",

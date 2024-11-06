@@ -52,5 +52,15 @@ trait AuthorizationTrait
 
             return false;
         }
+
+        //adyen authorization
+        if ($driver == 'adyen') {
+            $response = Http::withHeaders([
+                'X-API-Key' => $secret,
+            ])->get('https://checkout-test.adyen.com/v71/storedPaymentMethods?merchantAccount=CullenJewelleryCOM');
+
+
+            return ($response->getStatusCode() == 200);
+        }
     }
 }

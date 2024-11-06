@@ -3,9 +3,10 @@
 namespace Modules\Payments\Services;
 
 use App\Models\PaymentMethod;
-use Modules\Payments\Services\Paypal\PaymentProvider;
+use Modules\Payments\Services\Paypal\PaymentProvider as PaypalPaymentProvider;
 use Modules\Payments\Services\Razorpay\PaymentProvider as RazorpayPaymentProvider;
 use Modules\Payments\Services\Stripe\PaymentProvider as StripePaymentProvider;
+use Modules\Payments\Services\Adyen\PaymentProvider as AdyenPaymentProvider;
 use Modules\Payments\Helpers\VersionHelper;
 
 if (VersionHelper::checkAppVersion('<', '2.0.0')) {
@@ -35,9 +36,15 @@ class PaymentProcessor
                 break;
 
             case 'paypal':
-                $this->paymentProvider = new PaymentProvider();
+                $this->paymentProvider = new PaypalPaymentProvider();
 
                 break;
+
+            case 'adyen':
+              $this->paymentProvider = new AdyenPaymentProvider();
+
+              break;
+
         }
     }
 
