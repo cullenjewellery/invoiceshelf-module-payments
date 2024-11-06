@@ -26,6 +26,7 @@
   "require": {
     "stripe/stripe-php": "^7.103",
     "paypal/paypal-checkout-sdk": "^1.0",
-    "razorpay/razorpay": "^2.8"
+    "razorpay/razorpay": "^2.8",
+    "adyen/php-api-library": "^21.1"
   }
 }
