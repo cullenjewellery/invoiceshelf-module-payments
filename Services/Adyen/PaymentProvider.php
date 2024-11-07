@@ -77,9 +77,15 @@ class PaymentProvider implements PaymentInterface
     {
         $transaction = Transaction::whereTransactionId($transaction_id)->first();
 
-        $newHash = hash_hmac('sha256', "{$transaction_id}|{$request->payment_id}", $this->settings['secret']);
+        $sessionId = $request->payment_id;
 
-        if ($newHash == $request->signature) {
+
+        $response = Http::withHeaders([
+            'Content-Type' => 'application/json',
+            'X-API-Key' => $this->settings['secret'],
+        ])->get("https://checkout-test.adyen.com/v71/sessions/$sessionId");
+
+        if ($response->status() == 200 && $response->json()->status == "completed") {
             $transaction->completeTransaction();
 
             $payment = Payment::generatePayment($transaction);
