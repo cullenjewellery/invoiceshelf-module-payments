@@ -1,6 +1,6 @@
 <template>
   <div class="flex flex-col">
-    <div v-if="errorMessage === null">
+    <div v-if="errorMessage !== null">
       <PaymentErrorBlock :message="errorMessage" />
     </div>
 
@@ -70,6 +70,8 @@ async function createAdyenCheckout(data) {
 
     onPaymentCompleted: (result, _) => {
       console.log('Payment complete', JSON.stringify(result))
+
+      console.log(paymentProviderStore.selectedProvider)
 
       paymentProviderStore
         .confirmTransaction(data.transaction.unique_hash)
