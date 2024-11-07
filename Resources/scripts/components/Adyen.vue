@@ -1,32 +1,33 @@
 <template>
   <div class="flex flex-col">
-    <div v-if="showErrorMessage">
+    <div v-if="errorMessage === null">
       <PaymentErrorBlock :message="errorMessage" />
     </div>
 
-    <div class="payment" ref="paymentRef"></div>
+    <div v-if="isLoading" class="w-full flex items-center justify-center p-5">
+      <BaseSpinner class="text-primary-500 h-10 w-10" />
+    </div>
+
+    <div class="payment" ref="paymentRef" v-show="!isLoading"></div>
   </div>
 </template>
 
 <script setup>
-import { onMounted, inject, ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { usePaymentProviderStore } from '~/scripts/stores/payment-provider'
 import PaymentErrorBlock from './PaymentErrorBlock.vue'
-const { useRoute, useRouter } = window.VueRouter
+const { useRoute } = window.VueRouter
 
 import { AdyenCheckout, Card } from '@adyen/adyen-web';
 import '@adyen/adyen-web/styles/adyen.css';
 
 const paymentRef = ref()
-
 const route = useRoute()
-const router = useRouter()
-const utils = inject('utils')
 
 const isLoading = ref(true)
-const showErrorMessage = ref(false)
-let errorMessage = ref(null)
+const errorMessage = ref(null)
 const paymentReceiptUrl = ref(null)
+
 const emit = defineEmits(['disable', 'reload'])
 
 const paymentProviderStore = usePaymentProviderStore()
@@ -67,17 +68,18 @@ async function createAdyenCheckout(data) {
     locale: data.shopperLocale,
     countryCode: data.countryCode,
 
-    onPaymentCompleted: (result, component) => {
+    onPaymentCompleted: (result, _) => {
       console.log('Payment complete', JSON.stringify(result))
 
       paymentProviderStore
         .confirmTransaction(data.transaction.unique_hash)
-        .then((res) => {
+        .then((_) => {
           paymentReceiptUrl.value = `/m/payments/pdf/${data.transaction.unique_hash}`
           emit('reload', paymentReceiptUrl.value)
         })
     },
-    onPaymentFailed: (result, component) => {
+    onPaymentFailed: (result, _) => {
+      errorMessage.value = "Payment failed"
       console.log('Payment failed', JSON.stringify(result))
     },
     onError: (error, component) => {
