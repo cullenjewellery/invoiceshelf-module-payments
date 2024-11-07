@@ -73,9 +73,13 @@ async function createAdyenCheckout(data) {
 
       try {
         paymentProviderStore
-          .confirmTransaction(data.transaction.unique_hash)
-          .then((_) => {
-            paymentReceiptUrl.value = `/m/payments/pdf/${data.transaction.unique_hash}`
+          .confirmTransaction(data.id, {
+            payment_id: data.id,
+            order_id: data.reference,
+            company_id: route.params.company,
+          })
+          .then((res) => {
+            paymentReceiptUrl.value = `/m/payments/pdf/${res.data.transaction.unique_hash}`
             emit('reload', paymentReceiptUrl.value)
           })
       } catch (error) {
