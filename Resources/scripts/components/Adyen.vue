@@ -78,7 +78,7 @@ async function createAdyenCheckout(data) {
         })
     },
     onPaymentFailed: (result, component) => {
-      console.error("result: " + result);
+      console.log('Payment failed', JSON.stringify(result))
     },
     onError: (error, component) => {
 	    console.error(error.name, error.message, error.stack, component);
