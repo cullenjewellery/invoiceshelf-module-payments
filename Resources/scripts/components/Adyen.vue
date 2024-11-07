@@ -8,7 +8,7 @@
       <BaseSpinner class="text-primary-500 h-10 w-10" />
     </div>
 
-    <div class="payment" ref="paymentRef" v-show="!isLoading"></div>
+    <div class="payment" ref="paymentRef" v-show="!isLoading && errorMessage === null"></div>
   </div>
 </template>
 
@@ -71,14 +71,17 @@ async function createAdyenCheckout(data) {
     onPaymentCompleted: (result, _) => {
       console.log('Payment complete', JSON.stringify(result))
 
-      console.log(paymentProviderStore.selectedProvider)
-
-      paymentProviderStore
-        .confirmTransaction(data.transaction.unique_hash)
-        .then((_) => {
-          paymentReceiptUrl.value = `/m/payments/pdf/${data.transaction.unique_hash}`
-          emit('reload', paymentReceiptUrl.value)
-        })
+      try {
+        paymentProviderStore
+          .confirmTransaction(data.transaction.unique_hash)
+          .then((_) => {
+            paymentReceiptUrl.value = `/m/payments/pdf/${data.transaction.unique_hash}`
+            emit('reload', paymentReceiptUrl.value)
+          })
+      } catch (error) {
+        console.log('confirm transaction failed')
+        console.error(error)
+      }
     },
     onPaymentFailed: (result, _) => {
       errorMessage.value = "Payment failed"
